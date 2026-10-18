@@ -30,8 +30,9 @@ This repository includes the following:
 * Gateway servers in NodeJS and Python, which serve as a bridge from p5.js to the flipdot device. Generally you would select one or the other:
   * **[`libs/javascript/`](libs/javascript/)**
   * **[`libs/python/`](libs/python/)**
-* Hardware information: 
-  * **[`case`](case/)**: DXF and other CAD files for creating an acrylic lasercut box for the Alfa-Zeta XY5 display. This is helpful, as the display tiles do not otherwise sit flat on a table.
+* Additional technical information: 
+  * **[`case/`](case/)**: DXF and other CAD files for creating an acrylic lasercut box for the Alfa-Zeta XY5 display. This is helpful, as the display tiles do not otherwise sit flat on a table.
+  * **[`technical.md`](technical.md)**: detailed technical information about hardware and software configuration. 
 
 
 ---
