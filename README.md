@@ -2,7 +2,7 @@
 
 ![p5 Ptixy flipdots loop](img/p5_flipdots_loop.gif)
 
-*This project presents an API and related tooling for the realtime control of an [Alfa-Zeta XY5 flip-dot display] (https://flipdots.com/en/products-services/flip-dot-boards-xy5/) with p5.js. It was developed in fall 2024 by [Yon Maor](https://www.linkedin.com/in/yonmaor/) and [Golan Levin](https://golanlevin.github.io/) with support from the [Frank-Ratchye Further Fund](https://studioforcreativeinquiry.org/frff-grants-microgrants) and the [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org/) at Carnegie Mellon University. The current version of the project is compatible with p5.js 2.3.4 and requires either Python 3.9+ or Node.js 20+ to run the local gateway server.*
+*This project presents an API and related tooling for the realtime control of an [Alfa-Zeta XY5 flip-dot display](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) with p5.js. It was developed in fall 2024 by [Yon Maor](https://www.linkedin.com/in/yonmaor/) and [Golan Levin](https://golanlevin.github.io/) with support from the [Frank-Ratchye Further Fund](https://studioforcreativeinquiry.org/frff-grants-microgrants) and the [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org/) at Carnegie Mellon University. The current version of the project is compatible with p5.js 2.3.4 and requires either Python 3.9+ or Node.js 20+ to run the local gateway server.*
 
 
 ---
