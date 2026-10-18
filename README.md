@@ -145,7 +145,7 @@ This repo provides three browser-based p5.js apps, each of which transmits comma
 
 ![ptixy_screenrecording.gif](img/ptixy_screenrecording.gif)
 
-**ptixy** is a p5.js adaptation of Martin Kleppe's [code-golfing](https://en.wikipedia.org/wiki/Code_golf) platform [*tixy.land*](https://tixy.land/), described by its creator as "[the most minimalist creative coding environment](https://x.com/aemkei/status/1323399877611708416)". As with tixy.land, we present a demonstration app in which a user's single-line JavaScript expression is used to govern the color of each pixel in the flipdot display. In addition to considering each pixel's `x`, `y`, `i` (index), and the current time `t`, our app, *ptixy*, also adds a buffer `P[]`, a one-dimensional array containing the previous frame's pixel states. To use *ptixy*, launch the server and navigate to `http://localhost:8081/ptixy`. Here are a few formulas you can try out:
+**[`ptixy`](ptixy/)** is a p5.js adaptation of Martin Kleppe's [code-golfing](https://en.wikipedia.org/wiki/Code_golf) platform [*tixy.land*](https://tixy.land/), described by its creator as "[the most minimalist creative coding environment](https://x.com/aemkei/status/1323399877611708416)". As with tixy.land, we present a demonstration app in which a user's single-line JavaScript expression is used to govern the color of each pixel in the flipdot display. In addition to considering each pixel's `x`, `y`, `i` (index), and the current time `t`, our app, *ptixy*, also adds a buffer `P[]`, a one-dimensional array containing the previous frame's pixel states. To use *ptixy*, launch the server and navigate to `http://localhost:8081/ptixy`. Here are a few formulas you can try out:
 
 * `sin(t / 2 + y + sin(x / 2)) > cos(t / 10)`
 * `random(0,1) < (0.5 + 0.5*sin(t/30.0))`
@@ -154,7 +154,7 @@ This repo provides three browser-based p5.js apps, each of which transmits comma
 * `(((x+t)^y)%9)&8`
 * `t & 2**i // Binary counting (Every Icon)`
 
-Here's Conway's Life, devised by Vera Yu, which uses the `P[]` previous-frame array:
+Here's [Conway's Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), formulated for ptixy by Vera Yu, which uses the `P[]` previous-frame array:
 
 ```
 ((round(random()) == 1) && t%150== 0) ||
@@ -165,25 +165,22 @@ P[i-28+1] + P[i+28-1] + P[i-28-1] + P[i+28+1]) == 2 ? P[i] : 0
 ```
 
 
-**ptixy_player** plays a looping presentation of formulas. Open [`http://localhost:8081/ptixy_player/`](http://localhost:8081/ptixy_player/) using either server. Each formula currently runs for 30 seconds; edit `makePrograms()` in `ptixy_player/sketch.js` to change the playlist, or `nSecondsToRunProgram` to change the duration (`60` for one minute). The supplied 13 formulas are preserved. Left/right arrow keys select the previous/next program, and digits 0–9 select the corresponding program number. Manual selection restarts the timer, frame count, and previous-frame memory. The current formula is shown in a read-only text area. A YouTube video showing the *ptixy_player* can be seen [here](https://www.youtube.com/watch?v=FBX2Ip7U4vs).
+**[`ptixy_player`](ptixy_player/)** plays a looping presentation of formulas, suitable for a gallery. Open [`http://localhost:8081/ptixy_player/`](http://localhost:8081/ptixy_player/) using either server. Each formula currently runs for 30 seconds; edit `makePrograms()` in `ptixy_player/sketch.js` to change the playlist, or `nSecondsToRunProgram` to change the duration (`60` for one minute). The supplied 13 formulas are preserved. Left/right arrow keys select the previous/next program, and digits 0–9 select the corresponding program number. Manual selection restarts the timer, frame count, and previous-frame memory. The current formula is shown in a read-only text area. A YouTube video showing the *ptixy_player* can be seen [here](https://www.youtube.com/watch?v=FBX2Ip7U4vs).
 
 **Hosted versions:** `ptixy_online/` contains the working editor exported from [the p5.js Web Editor](https://editor.p5js.org/golan/sketches/lq1DzZVjD). [`ptixy_player_online/`](ptixy_player_online/readme.md) provides the corresponding player, with the same 13 formulas and current 15-second duration as the local player. Each folder includes its own `sketch.js`, `flipdot.js`, `index.html`, and `style.css`, so it can be copied into a Web Editor sketch without repository-relative libraries. Both use p5.js 2.3.4 and a Connect button for the local bridge. Start either server on the browser's computer, then click Connect and allow local access if prompted. If the API port differs from 3000, change `FLIPDOT_SERVER_URL` in that hosted sketch's `flipdot.js`. The server enforces its JSON settings; these hosted versions do not load that file themselves. Use a development server to preview these folders locally.
 
-**canvas** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function. To use it, launch the server and navigate to `http://localhost:8081/canvas`
+**[`canvas`](canvas/)** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function. To use it, launch the server and navigate to `http://localhost:8081/canvas`
 
 
 ---
 
 ## Related Flipdot Projects
 
-The following projects present alternative approaches to supporting creative coding with the Alfa-Zeta XY5 flipdot display and similar devices.
+The following projects present some alternative approaches and APIs for supporting creative coding with the Alfa-Zeta XY5 flipdot display:
 
 * [https://github.com/owenmcateer/FlipDots](https://github.com/owenmcateer/FlipDots): Processing controller for the same display, by @owenmcateer
 * [https://github.com/owenmcateer/FlipDots/tree/master/CastCanvas](https://github.com/owenmcateer/FlipDots/tree/master/CastCanvas): Accepts an image buffer over WebSockets, converts it to FlipDot data, and pushes it out over USB.
 * [https://github.com/dcreemer/flipdot/blob/master/docs/XY5_arduino.txt](https://github.com/dcreemer/flipdot/blob/master/docs/XY5_arduino.txt): Arduino controller example
 * [https://github.com/andydbc/Dot/](https://github.com/andydbc/Dot): C++ controller for the same display, by @andydbc
 * [https://github.com/dcreemer/flipdot](https://github.com/dcreemer/flipdot): Python controller, by @dcreemer
-
----
-
 
