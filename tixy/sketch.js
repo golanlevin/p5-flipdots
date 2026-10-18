@@ -1,20 +1,21 @@
 // p5 Control software for the Alfa-Zeta XY5 Flipdot display
 // Created by Yon Maor for Golan Levin's Creative Coding
 // course (60-212) at Carnegie Mellon University, Fall 2024
+// Updated by Golan Levin, Fall 2026
 //
 // More info: https://github.com/yonmaor1/p5-flipdots 
 // https://flipdots.com/en/products-services/flip-dot-boards-xy5/
 // Requires the file: flipdot.js: 
-// https://github.com/yonmaor1/p5-flipdots/blob/main/libs/flipdot.js
-// Requires the p5.js and p5.serialport.js libraries:
-// https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.0/p5.js
-// https://cdn.jsdelivr.net/npm/p5.serialserver@0.0.28/lib/p5.serialport.js
+// https://github.com/yonmaor1/p5-flipdots/blob/main/libs/javascript/flipdot.js
+// Requires p5.js 2.3.4:
+// https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.js
+// Serial communication uses the local HTTP bridge; no browser serial add-on is needed.
 //
 // Instructions: 
 // 1. Follow node package installation instructions at 
 //    https://github.com/yonmaor1/p5-flipdots/blob/main/README.md
 // 2. Connect powered XY5 to serial port via USB-to-RS485 connector
-// 3. Launch serial communications server: `node golive.js`
+// 3. Launch serial communications server: `node flipdot_server.js` or `python flipdot_server.py`
 // 4. Ensure ENABLE_TX is true in flipdot.js
 // 5. Run this sketch in the browser, fiddle with the f_str expression!
 //
@@ -23,234 +24,197 @@
 // Inspired by https://tixy.land/ by Martin Kleppe
 
 
-const ENABLE_TX = true; // set to true to enable sending signals to flipdot display
+const ENABLE_TX = true; // Set to false for a browser-only preview.
 
 let f_str = 'sin(t-sqrt((x-7.5)**2+(y-6)**2))';
-let color_func = eval(`(x,y,i,t,P) => ${f_str}`);
-
+let color_func = null;
 let function_field;
+let error_field;
 let canvas;
 let frames_since = 0;
 let pixs = [];
+let last_input = null;
+let pending_expression = null;
+let expression_paused = false;
+let expression_error = '';
+const expressionEvaluator = new TixyEvaluator(NUM_COLS, NUM_ROWS);
 
 //------------------------------------------------------------
 function setup() {
     canvas = createCanvas(800, 600);
     frameRate(15);
     textFont('monospace');
-    function_field = createElement('textarea');
-    function_field.size(750, 100);
-    function_field.position(20, height - 120);
-    function_field.style('font-size', '16px');
-    function_field.value(f_str);
-    windowResized();
 
-    for (let i = 0; i < NUM_COLS * NUM_ROWS; i++) {
-        pixs.push(0);
-    }
+    function_field = createElement('textarea');
+    function_field.id('tixy-expression');
+    function_field.size(750, 85);
+    function_field.style('font-size', '16px');
+    function_field.style('box-sizing', 'border-box');
+    function_field.attribute('aria-label', 'Pixel expression');
+    function_field.attribute('aria-describedby', 'tixy-error');
+    function_field.value(f_str);
+
+    error_field = createElement('div');
+    error_field.id('tixy-error');
+    error_field.attribute('role', 'status');
+    error_field.attribute('aria-live', 'polite');
+    error_field.style('color', '#ffb3b3');
+    error_field.style('font-family', 'monospace');
+    error_field.style('font-size', '12px');
+    error_field.style('line-height', '14px');
+    error_field.style('width', '750px');
+    error_field.style('max-height', '32px');
+    error_field.style('overflow', 'auto');
+
+    pixs = Array(NUM_COLS * NUM_ROWS).fill(0);
+    update_panel_bits();
+    set_expression_error('');
+    windowResized();
 }
 
 //------------------------------------------------------------
 function draw() {
-    background(0);
+    background(64);
     noStroke();
-    fill(64);
-    rect(0, 0, width, height);
 
-    draw_info();
     func_input();
-    draw_tixy_grid(color_func);
-
+    update_expression_frame();
+    draw_info();
+    draw_tixy_grid();
+    // Only complete, successfully evaluated frames reach the panel buffers.
+    // Resending a held frame also lets the transport recover after an outage.
     tixy2display();
-    
-    frames_since += 1;
 }
 
 //------------------------------------------------------------
-/**
- * @brief check if the provided string is a valid function
- * 
- * @param {string} f_str string to check
- * 
- * @returns {boolean} true if the provided string is a valid function
- */
-function is_valid_function(f_str) {
-    
-    if (!f_str) {
-        return false;
-    }
-
-    try {
-        // try to create a new function with the provided string
-        let test_f = new Function(`return (x, y, i, t, P) => ${f_str}`);
-        let test_value = test_f()(0, 0, 0, 0, [0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
-        if (typeof test_value != 'number' && typeof test_value != 'boolean') {
-            return false;
-        }
-        
-        return true;
-    } catch (e) {
-        return false;
-    }
+/** Compile syntax only; execution is checked across the whole grid each frame. */
+function compile_expression(source) {
+    return expressionEvaluator.compile(source);
 }
 
-//------------------------------------------------------------
-/**
- * @brief eval the function from the input field
- */
+/** Check changed editor text once, keeping the active animation on invalid edits. */
 function func_input() {
-
-    let prev_f_str = f_str;
-    f_str = function_field.value();
-    f_str = parse_function(f_str);
-
-    if (f_str == prev_f_str) {
-        return;
+    const source = function_field.value();
+    if (source === last_input) return;
+    last_input = source;
+    pending_expression = null;
+    try {
+        pending_expression = { source, f: compile_expression(source) };
+    } catch (error) {
+        set_expression_error(error_message(error) + ' Previous frame/expression kept.');
     }
-    if (is_valid_function(f_str)) {
-        try {
-            color_func = eval(`(x, y, i, t, P) => ${f_str}`);
-            frames_since = 0;
-            for (let i = 0; i < NUM_COLS * NUM_ROWS; i++) {
-                pixs[i] = 0;
-            }
-        } catch (e) { // probably in the middle of typing
-            try {
-                color_func = eval(`(x, y, i, t, P) => ${prev_f_str}`);
-                f_str = prev_f_str;
-                for (let i = 0; i < NUM_COLS * NUM_ROWS; i++) {
-                    pixs[i] = 0;
-                }
-            } catch (e) { // something went wrong
-                color_func = () => 0; // fallback to a default function
-                f_str = '0';
-            }
-        }
-    } else {
-        color_func = eval(`(x, y, i, t, P) => ${prev_f_str}`);
-        f_str = prev_f_str;
-        for (let i = 0; i < NUM_COLS * NUM_ROWS; i++) {
-            pixs[i] = 0;
-        }
-    }
-
 }
 
-/**
- * @brief get the value of the pixel at index i, or 0 if i is out of bounds
- * 
- * @param {number} i index of the pixel
- * 
- * @returns {number} value of the pixel
- */
+/** Format thrown values as plain text, including errors thrown by user code. */
+function error_message(error) {
+    return TixyEvaluator.errorMessage(error);
+}
+
+/** Show feedback without alerts, console flooding, or interpreting user text as HTML. */
+function set_expression_error(message) {
+    expression_error = message;
+    if (!error_field) return;
+    error_field.elt.textContent = message;
+    function_field.attribute('aria-invalid', message ? 'true' : 'false');
+    function_field.style('border', `1px solid ${message ? '#ff8888' : '#999'}`);
+}
+
+/** Retain the existing helper for expressions that explicitly call getP(i). */
 function getP(i) {
-    // i = i % (NUM_COLS * NUM_ROWS);
-    if (i < 0 || i >= NUM_COLS * NUM_ROWS) {
-        return 0;
+    return expressionEvaluator.getP(i, pixs);
+}
+
+/**
+ * Evaluate into a temporary frame. A fault at any cell discards the entire result.
+ * This catches errors hidden behind x/y/i/t-dependent branches, not just at (0,0).
+ */
+function evaluate_expression_frame(f, t, previous) {
+    return expressionEvaluator.evaluate(f, t, previous);
+}
+
+/** Commit a candidate only after its first full frame succeeds. */
+function update_expression_frame() {
+    if (pending_expression) {
+        const candidate = pending_expression;
+        pending_expression = null;
+        try {
+            const next = evaluate_expression_frame(candidate.f, 0, Array(NUM_COLS * NUM_ROWS).fill(0));
+            color_func = candidate.f;
+            f_str = candidate.source;
+            pixs = next;
+            frames_since = 1;
+            expression_paused = false;
+            set_expression_error('');
+            update_panel_bits();
+            return;
+        } catch (error) {
+            set_expression_error(error_message(error) + ' Previous frame/expression kept.');
+        }
     }
-    return pixs[i];
+
+    if (!color_func || expression_paused) return;
+    try {
+        const next = evaluate_expression_frame(color_func, frames_since, pixs);
+        pixs = next;
+        frames_since += 1;
+        update_panel_bits();
+    } catch (error) {
+        // A formerly working expression can fail at a later time. Hold its last
+        // complete frame until the user edits it, instead of throwing out of draw().
+        expression_paused = true;
+        set_expression_error(error_message(error) + ' Frame held; edit expression to resume.');
+    }
 }
 
-/**
- * @brief parse the function string to replace P[i] with getP(i)
- * 
- * @param {string} f_str function string
- * 
- * @returns {string} parsed function string
- */
-function parse_function(f_str) {
-    return f_str.replace(/P/g, 'getP').replace(/\[/g, '(').replace(/\]/g, ')');
+/** Pack the committed frame using the existing column/panel ordering. */
+function update_panel_bits() {
+    panel_0_bits = [];
+    panel_1_bits = [];
+    for (let x = 0; x < NUM_COLS; x++) {
+        for (let y = 0; y < NUM_ROWS; y++) {
+            const bit = pixs[x + y * NUM_COLS];
+            if (y < 7) panel_1_bits.push(bit);
+            else panel_0_bits.push(bit);
+        }
+    }
 }
 
 //------------------------------------------------------------
-/**
- * @brief resize the function input field
- */
 function windowResized() {
-    let canvasX = canvas.position().x;
-    let canvasY = canvas.position().y;
-    function_field.position(canvasX + 20, canvasY + height - 120);
+    if (!canvas || !function_field || !error_field) return;
+    const canvasX = canvas.position().x;
+    const canvasY = canvas.position().y;
+    function_field.position(canvasX + 20, canvasY + height - 130);
+    error_field.position(canvasX + 20, canvasY + height - 38);
 }
 
-//------------------------------------------------------------
-/**
- * @brief draw the info text
- */
 function draw_info() {
     noStroke();
     fill('white');
     textSize(16);
-    let displayStr = "// input must be a valid javascript expression\n";
-    displayStr += "(x,y,i,t,P) =>";
-    text(displayStr, 20, height - 150);
+    text('// input must be a valid javascript expression\n// available variables: P,t,i,x,y', 20, height - 160);
+    push();
+    textAlign(RIGHT);
+    const connectionEmoji = { connecting: '🟡', connected: '🟢', disconnected: '🔴' };
+    text(`tx: ${connectionEmoji[flipdot_connection_status()]}`, width - 30, height - 160);
+    pop();
 }
 
-//------------------------------------------------------------
-/**
- * @brief draw the tixy grid
- * 
- * @param {function} f function to determine the color of each cell
- */
-function draw_tixy_grid(f) {
-    // clear the panels
-    panel_0_bits = [];
-    panel_1_bits = [];
-
-    let P = pixs;
-    let tmp_pixs = []
+/** Draw only committed bits; user expressions never run inside rendering calls. */
+function draw_tixy_grid() {
     for (let x = 0; x < NUM_COLS; x++) {
         for (let y = 0; y < NUM_ROWS; y++) {
-            let i = x + y * NUM_COLS;
-            let t = frames_since;
-            // let P = get_prev_bits(i);
-            
-            let bit = draw_tixy_cell(x, y, i, t, P, f);
-            tmp_pixs[i] = bit;
-            // P[i] = bit;
-
-            // if (y == 0) {
-            //     panel_1_bits.push(0);
-            // } else if (y == 7) {
-            //     panel_2_bits.push(0);
-            // }
-
-            if (y < 7) {
-                panel_1_bits.push(bit);
-            } else {
-                panel_0_bits.push(bit);
-            }
+            draw_tixy_cell(x, y, pixs[x + y * NUM_COLS]);
         }
     }
-
-    pixs = tmp_pixs;
 }
 
-//------------------------------------------------------------
-/**
- * @brief draw a single tixy cell
- * 
- * @param {number} x x coordinate of the cell
- * @param {number} y y coordinate of the cell
- * @param {number} i index of the cell
- * @param {number} t current frame
- * @param {number[]} P previous bits
- * 
- * @returns {number} the value of the cell (0 or 1)
- */
-function draw_tixy_cell(x, y, i, t, P, f) {
-    let margin = 30;
-    let gridAreaWidth = (width - 2 * margin);
-    let cellSize = gridAreaWidth / NUM_COLS;
-
-    let px = x * cellSize + (cellSize / 2) + margin;
-    let py = y * cellSize + (cellSize / 2) + margin;
-
-    let v = (f(x, y, i, t, P) > 0) ? 1 : 0;
-    let c = v ? 'white' : 'black';
-
-    fill(c);
+function draw_tixy_cell(x, y, bit) {
+    const margin = 30;
+    const cellSize = (width - 2 * margin) / NUM_COLS;
+    const px = x * cellSize + cellSize / 2 + margin;
+    const py = y * cellSize + cellSize / 2 + margin;
+    fill(bit ? 'white' : 'black');
     noStroke();
     circle(px, py, 0.9 * cellSize);
-    return v;
 }

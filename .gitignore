@@ -1,2 +1,64 @@
-node_modules
+# macOS metadata (at any depth)
 .DS_Store
+._*
+
+# JavaScript dependencies and caches
+node_modules/
+.npm/
+.cache/
+
+# Python virtual environments
+.venv/
+.venv-*/
+venv/
+venv-*/
+env/
+ENV/
+
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Test coverage output
+coverage/
+.nyc_output/
+.coverage
+.coverage.*
+htmlcov/
+
+# Generated browser-test reports and recordings
+playwright-report/
+test-results/
+blob-report/
+
+# Local editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# Local scratch work (keep application source and documentation)
+/temp/
+/tmp/
+
+# Runtime logs and process IDs
+*.log
+*.pid
+
+# Temporary configuration writes; flipdot_config.json itself stays in Git
+flipdot_config.json.*.tmp
+
+# Local environment configuration; keep shareable templates
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template

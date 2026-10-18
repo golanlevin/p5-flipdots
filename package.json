@@ -2,13 +2,16 @@
   "name": "p5-flipdots",
   "version": "1.0.0",
   "description": "control a flip-dot display via p5.js",
-  "main": "golive.js",
+  "main": "flipdot_server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node golive.js"
+    "test": "node --test test/*.test.js",
+    "start": "node flipdot_server.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +30,6 @@
     "express": "^4.21.1",
     "install": "^0.13.0",
     "npm": "^10.9.0",
-    "serialport": "^12.0.0"
+    "serialport": "^13.0.0"
   }
 }

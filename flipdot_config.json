@@ -1,0 +1,9 @@
+{
+  "webPort": 8081,
+  "httpPort": 3000,
+  "transmitEnabled": true,
+  "serialPort": "/dev/tty.usbserial-A9E7G8FR",
+  "serialNumber": "A9E7G8FR",
+  "vendorId": "0403",
+  "productId": "6001"
+}

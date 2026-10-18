@@ -1,11 +1,13 @@
-/** set to true to enable sending signals to flipdot display */
-const ENABLE_TX = false;
-/** */
+/** Set to false for a browser-only preview. Run flipdot_server.js or flipdot_server.py to transmit. */
+const ENABLE_TX = true;
 
 let capture;
 
 function setup() {
-    createCanvas(28 * 28, 14 * 28);
+    // One pixel sample per canvas pixel keeps rasterization predictable on Retina displays.
+    pixelDensity(1);
+    createCanvas(NUM_COLS * 28, NUM_ROWS * 28);
+    frameRate(15);
     // capture = createCapture(VIDEO);
     // capture.size(28 * 28, 14 * 28);
     // capture.hide();
@@ -41,6 +43,6 @@ function draw() {
     // capture.updatePixels();
     // image(capture, 0, 0);
 
-    canvas2display()
+    canvas2display();
 }
 
