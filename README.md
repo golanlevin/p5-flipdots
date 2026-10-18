@@ -4,6 +4,11 @@
 
 *This project presents an API and related tooling for the realtime control of an [Alfa-Zeta XY5 flip-dot display](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) with p5.js. It was developed in fall 2024 by [Yon Maor](https://www.linkedin.com/in/yonmaor/) and [Golan Levin](https://golanlevin.github.io/) with support from the [Frank-Ratchye Further Fund](https://studioforcreativeinquiry.org/frff-grants-microgrants) and the [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org/) at Carnegie Mellon University. The current version of the project is compatible with p5.js 2.3.4 and requires either Python 3.9+ or Node.js 20+ to run the local gateway server.*
 
+* [Overview](#overview)
+* [Quickstart Setup Instructions](#quickstart-setup-instructions)
+* [p5 Example Apps](#p5-example-apps)
+* [Related Flipdot Projects](#related-flipdot-projects)
+
 
 ---
 
@@ -15,8 +20,8 @@
 
 We are using the following equipment: 
 
-* [Alfa-Zeta XY5 Flipdot display, 28x14 pixels, 13.5mm dots](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) (about $500)
-* [USB-C to RS485/RS422 Serial Port Converter](https://www.amazon.com/OIKWAN-Converter-Adapter-Supports-Windows/dp/B0CS35249T/) ($22)
+* [Alfa-Zeta XY5 Flipdot display, 28x14 pixels, 13.5mm dots](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) (about $600)
+* [USB-C to RS485/RS422 FTID Serial Port Converter](https://www.amazon.com/OIKWAN-Converter-Adapter-Supports-Windows/dp/B0CS35249T/) ($22)
 * [24V DC power supply](https://www.amazon.com/Auplf-Supply-Adapter-100-240V-Cameras/dp/B088897J2D/) ($17)
 
 This repository includes the following: 
@@ -37,7 +42,7 @@ This repository includes the following:
 
 ---
 
-## Setup Quickstart Instructions
+## Quickstart Setup Instructions
 
 ### 0. TD,LR:
 
@@ -69,7 +74,7 @@ $ git clone https://github.com/golanlevin/p5-flipdots.git
 $ cd p5-flipdots
 ```
 
-At this point, you should choose whether you wish to run the Node.js server (see step 2A) **or** the Python server (jump to step 2B). 
+At this point, you should choose whether you wish to run the Node.js server (see step 2A) **or** the Python server ([jump to step 2B](#or-2b-how-to-run-the-python-server)). 
 
 ### 2A. How to run the Node.js (JavaScript) server
 
@@ -148,7 +153,7 @@ This repo provides three browser-based p5.js apps, each of which transmits comma
 * `(((x+t)^y)%9)&8`
 * `t & 2**i // Binary counting (Every Icon)`
 
-Here's Conway's Life, devised by Vera Yu:
+Here's Conway's Life, devised by Vera Yu, which uses the `P[]` array:
 
 ```
 ((round(random()) == 1) && t%150== 0) ||
