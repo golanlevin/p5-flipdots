@@ -2,7 +2,7 @@
 
 ![p5 Ptixy flipdots loop](img/p5_flipdots_loop.gif)
 
-*This project presents an API and related tooling for the realtime control of an [Alfa-Zeta XY5 flip-dot display](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) with p5.js. It was developed in fall 2024 by [Yon Maor](https://www.linkedin.com/in/yonmaor/) and [Golan Levin](https://golanlevin.github.io/) with support from the [Frank-Ratchye Further Fund](https://studioforcreativeinquiry.org/frff-grants-microgrants) and the [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org/) at Carnegie Mellon University. The current version of the project is compatible with p5.js 2.3.4 and requires either Python 3.9+ or Node.js 20+ to run the local gateway server.*
+*This project presents an API and related tooling for the realtime control of an [Alfa-Zeta XY5 flip-dot display](https://flipdots.com/en/products-services/flip-dot-boards-xy5/) with p5.js. It was initially developed in fall 2024 by [Yon Maor](https://www.linkedin.com/in/yonmaor/) and [Golan Levin](https://golanlevin.github.io/) with support from the [Frank-Ratchye Further Fund](https://studioforcreativeinquiry.org/frff-grants-microgrants) and the [Frank-Ratchye STUDIO for Creative Inquiry](https://studioforcreativeinquiry.org/) at Carnegie Mellon University. The current (2026) version of the project is compatible with p5.js 2.3.4 and requires either Python 3.9+ or Node.js 20+ to run the local gateway server.*
 
 * [Overview](#overview)
 * [Quickstart Setup Instructions](#quickstart-setup-instructions)
@@ -24,7 +24,7 @@ We are using the following equipment:
 * [USB-C to RS485/RS422 FTID Serial Port Converter](https://www.amazon.com/OIKWAN-Converter-Adapter-Supports-Windows/dp/B0CS35249T/) ($22)
 * [24V DC power supply](https://www.amazon.com/Auplf-Supply-Adapter-100-240V-Cameras/dp/B088897J2D/) ($17)
 
-This repository includes the following: 
+To run the display, this project requires **two pieces of software** to run concurrently: A browser-based **p5.js sketch** that specifies how each flip-disc pixel should be flipped, and a **gateway server** that bridges the p5 sketch (via an HTTP connection) to an RS-485 USB serial adapter connected to the flipdot display. This repository includes the following: 
 
 * Example apps in p5.js:
   * **[`ptixy`](ptixy/)**: A code-golfing sketchpad inspired by Martin Kleppe's [*tixy.land*](https://tixy.land/), intended for local use. 
@@ -37,7 +37,7 @@ This repository includes the following:
   * **[`libs/python/`](libs/python/)**
 * Additional technical information: 
   * **[`case/`](case/)**: DXF and other CAD files for creating an acrylic lasercut box for the Alfa-Zeta XY5 display. This is helpful, as the display tiles do not otherwise sit flat on a table.
-  * **[`technical.md`](technical.md)**: detailed technical information about hardware and software configuration. 
+  * **[`technical.md`](technical.md)**: Additional, detailed technical information about hardware and software configuration. 
 
 
 ---
@@ -46,7 +46,7 @@ This repository includes the following:
 
 ### 0. TD,LR:
 
-There are two different bridge servers to choose from: NodeJS **or** Python. To install the NodeJS version:
+There are **two different bridge servers** to choose from: NodeJS **or** Python. To install the NodeJS version:
 
 ```
 $ git clone https://github.com/golanlevin/p5-flipdots.git
@@ -58,7 +58,7 @@ $ node flipdot_server.js
 $ open http://localhost:8081/
 ```
 
-For the alternative Python-based server, use the Python setup instructions below.
+For the alternate Python-based server, use the [Python setup instructions below](#or-2b-how-to-run-the-python-server).
 
 
 ### 1. Getting Started 
@@ -75,6 +75,7 @@ $ cd p5-flipdots
 ```
 
 At this point, you should choose whether you wish to run the Node.js server (see step 2A) **or** the Python server ([jump to step 2B](#or-2b-how-to-run-the-python-server)). 
+
 
 ### 2A. How to run the Node.js (JavaScript) server
 
@@ -144,7 +145,7 @@ This repo provides three browser-based p5.js apps, each of which transmits comma
 
 ![ptixy_screenrecording.gif](img/ptixy_screenrecording.gif)
 
-**ptixy** is a p5.js adaptation of Martin Kleppe's [code-golfing](https://en.wikipedia.org/wiki/Code_golf) platform [*tixy.land*](https://tixy.land/), described by its creator as "[the most minimalist creative coding environment](https://x.com/aemkei/status/1323399877611708416)". As with tixy.land, we present a demonstration app in which a user's single-line JavaScript expression is used to govern the color of each pixel in the flipdot display. In addition to considering each pixel's `x`, `y`, `i` (index), and the current time `t`, our app, *ptixy*, also adds a buffer `P[]`, an array containing the previous frame's pixel states. To use *ptixy*, launch the server and navigate to `http://localhost:8081/ptixy`. Here are a few formulas you can try out:
+**ptixy** is a p5.js adaptation of Martin Kleppe's [code-golfing](https://en.wikipedia.org/wiki/Code_golf) platform [*tixy.land*](https://tixy.land/), described by its creator as "[the most minimalist creative coding environment](https://x.com/aemkei/status/1323399877611708416)". As with tixy.land, we present a demonstration app in which a user's single-line JavaScript expression is used to govern the color of each pixel in the flipdot display. In addition to considering each pixel's `x`, `y`, `i` (index), and the current time `t`, our app, *ptixy*, also adds a buffer `P[]`, a one-dimensional array containing the previous frame's pixel states. To use *ptixy*, launch the server and navigate to `http://localhost:8081/ptixy`. Here are a few formulas you can try out:
 
 * `sin(t / 2 + y + sin(x / 2)) > cos(t / 10)`
 * `random(0,1) < (0.5 + 0.5*sin(t/30.0))`
@@ -153,7 +154,7 @@ This repo provides three browser-based p5.js apps, each of which transmits comma
 * `(((x+t)^y)%9)&8`
 * `t & 2**i // Binary counting (Every Icon)`
 
-Here's Conway's Life, devised by Vera Yu, which uses the `P[]` array:
+Here's Conway's Life, devised by Vera Yu, which uses the `P[]` previous-frame array:
 
 ```
 ((round(random()) == 1) && t%150== 0) ||
@@ -168,7 +169,7 @@ P[i-28+1] + P[i+28-1] + P[i-28-1] + P[i+28+1]) == 2 ? P[i] : 0
 
 **Hosted versions:** `ptixy_online/` contains the working editor exported from [the p5.js Web Editor](https://editor.p5js.org/golan/sketches/lq1DzZVjD). [`ptixy_player_online/`](ptixy_player_online/readme.md) provides the corresponding player, with the same 13 formulas and current 15-second duration as the local player. Each folder includes its own `sketch.js`, `flipdot.js`, `index.html`, and `style.css`, so it can be copied into a Web Editor sketch without repository-relative libraries. Both use p5.js 2.3.4 and a Connect button for the local bridge. Start either server on the browser's computer, then click Connect and allow local access if prompted. If the API port differs from 3000, change `FLIPDOT_SERVER_URL` in that hosted sketch's `flipdot.js`. The server enforces its JSON settings; these hosted versions do not load that file themselves. Use a development server to preview these folders locally.
 
-**canvas** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function (or wherever you would like to cast the canvas to the display). To use it, launch the server and navigate to `http://localhost:8081/canvas`
+**canvas** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function. To use it, launch the server and navigate to `http://localhost:8081/canvas`
 
 
 ---
@@ -185,7 +186,4 @@ The following projects present alternative approaches to supporting creative cod
 
 ---
 
-<!-- 
-https://editor.p5js.org/golan/sketches/lq1DzZVjD 
-https://editor.p5js.org/golan/sketches/8fVFZJzjP
--->
+
