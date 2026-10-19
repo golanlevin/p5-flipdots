@@ -39,6 +39,7 @@ To run the display, this project requires **two pieces of software** to run conc
   * **[`case/`](case/)**: DXF and other CAD files for creating an acrylic lasercut box for the Alfa-Zeta XY5 display. This is helpful, as the display tiles do not otherwise sit flat on a table.
   * **[`technical.md`](technical.md)**: Additional, detailed technical information about hardware and software configuration. 
 
+![flipdot canvas](img/flipdot_canvas.gif)<br/>*The interactive flipdot canvas sketch in use.*
 
 ---
 
@@ -172,7 +173,7 @@ P[i-28+1] + P[i+28-1] + P[i-28-1] + P[i+28+1]) == 2 ? P[i] : 0
   * [https://editor.p5js.org/golan/sketches/lq1DzZVjD](https://editor.p5js.org/golan/sketches/lq1DzZVjD): ptixy
   * [https://editor.p5js.org/golan/sketches/8fVFZJzjP](https://editor.p5js.org/golan/sketches/8fVFZJzjP): ptixy_player
 
-**[`canvas`](canvas/)** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function. To use it, launch the server and navigate to `http://localhost:8081/canvas`
+**[`canvas`](canvas/)** leverages p5 to allow you to cast any existing p5 sketch onto the display. To use it, navigate to `./canvas/sketch.js` and write your p5 sketch in there, ensuring that `canvas2display()` is called at the end of the `draw()` function. To use it, launch the server and navigate to `http://localhost:8081/canvas`.
 
 
 ---
