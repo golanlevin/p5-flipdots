@@ -33,8 +33,8 @@ To run the display, this project requires **two pieces of software** to run conc
   * **[`ptixy_player_online`](ptixy_player_online/)**: The same runner, modified for online hosting; a copy is [at editor.p5js.org](https://editor.p5js.org/golan/sketches/8fVFZJzjP).
   * **[`canvas`](canvas/)**: An app which renders a low-resolution version of the p5.js canvas on the flipdot display.
 * Gateway servers in NodeJS and Python, which serve as a bridge from p5.js to the flipdot device. Generally you would select one or the other:
-  * **[`libs/javascript/`](libs/javascript/)**
-  * **[`libs/python/`](libs/python/)**
+  * **[`flipdot_server.js`](flipdot_server.js)** + **[`libs/javascript/`](libs/javascript/)**
+  * **[`flipdot_server.py`](flipdot_server.py)** + **[`libs/python/`](libs/python/)**
 * Additional technical information: 
   * **[`case/`](case/)**: DXF and other CAD files for creating an acrylic lasercut box for the Alfa-Zeta XY5 display. This is helpful, as the display tiles do not otherwise sit flat on a table.
   * **[`technical.md`](technical.md)**: Additional, detailed technical information about hardware and software configuration. 
@@ -188,3 +188,6 @@ The following projects present some alternative approaches and APIs for supporti
 * [https://github.com/andydbc/Dot/](https://github.com/andydbc/Dot): C++ controller for the same display, by @andydbc
 * [https://github.com/dcreemer/flipdot](https://github.com/dcreemer/flipdot): Python controller, by @dcreemer
 
+---
+
+<!-- codex resume 01a14c74-186e-7d32-b2d2-41d3161ca3ef -->
